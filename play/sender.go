@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"sync/atomic"
 	"time"
 
@@ -50,6 +51,10 @@ func sendRequest(ctx context.Context, target *url.URL, line *logLine) error {
 	if err != nil {
 		fail()
 		return errors.Wrapf(err, "error parsing URL %s", line.url)
+	}
+
+	if filepath.Ext(line.url) != "" && filepath.Ext(line.url) != "html" {
+		return nil
 	}
 
 	u.Host = target.Host
