@@ -14,7 +14,8 @@ var (
 )
 
 func init() {
-	reClasic = regexp.MustCompile(`(?P<date>[^Z]+Z) (?P<elb>[^\s]+) (?P<ipclient>[^:]+?):[0-9]+ (?P<ipnode>[^:]+?):[0-9]+ (?P<reqtime>[0-9\.]+) (?P<backtime>[0-9\.]+) (?P<restime>[0-9\.]+) (?P<elbcode>[0-9]{3}) (?P<backcode>[0-9]{3}) (?P<lenght1>[0-9]+) (?P<lenght2>[0-9]+) "(?P<Method>[A-Z]+) (?P<URL>[^ ]+) HTTP/[0-9\.]+" "(?P<useragent>[^"]*)" .*`)
+	//reClasic = regexp.MustCompile(`(?P<date>[^Z]+Z) (?P<elb>[^\s]+) (?P<ipclient>[^:]+?):[0-9]+ (?P<ipnode>[^:]+?):[0-9]+ (?P<reqtime>[0-9\.]+) (?P<backtime>[0-9\.]+) (?P<restime>[0-9\.]+) (?P<elbcode>[0-9]{3}) (?P<backcode>[0-9]{3}) (?P<lenght1>[0-9]+) (?P<lenght2>[0-9]+) "(?P<Method>[A-Z]+) (?P<URL>[^ ]+) HTTP/[0-9\.]+" "(?P<useragent>[^"]*)" .*`)
+	reClasic = regexp.MustCompile(`^[\S]* - - [\[\]0-9\/A-z: +]*"(\S*) (\S*) HTTP\/1.1" (\S*) [0-9]* [\S]* "([\S ]*)"`)
 	matcherClasic = reClasic.SubexpNames()
 }
 
@@ -26,14 +27,15 @@ func parse(line string) (*logLine, error) {
 	}
 
 	match := matches[0]
-	statusCode, err := strconv.Atoi(match[8])
+	statusCode, err := strconv.Atoi(match[3])
 	if err != nil {
-		log.Errorf("Failed to parse status code (%s) from line %s", match[8], line)
+		log.Errorf("Failed to parse status code (%s) from line %s", match[3], line)
 	}
+
 	return &logLine{
 		statusCode: statusCode,
-		method:     match[12],
-		url:        match[13],
-		userAgent:  match[14],
+		method:     match[1],
+		url:        match[2],
+		userAgent:  match[4],
 	}, nil
 }
